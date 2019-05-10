@@ -17,5 +17,8 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// https://mvnrepository.com/artifact/org.springframework/spring-websocket
+	compile group: 'org.springframework', name: 'spring-websocket', version: '5.1.7.RELEASE'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
