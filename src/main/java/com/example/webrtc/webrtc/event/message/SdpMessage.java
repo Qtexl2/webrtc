@@ -2,7 +2,7 @@ package com.example.webrtc.webrtc.event.message;
 
 public class SdpMessage extends BaseMessage {
     private String sessionId;
-    private Offer offer;
+    private Offer message;
 
 
     public String getSessionId() {
@@ -13,19 +13,19 @@ public class SdpMessage extends BaseMessage {
         this.sessionId = sessionId;
     }
 
-    public Offer getOffer() {
-        return offer;
+    public Offer getMessage() {
+        return message;
     }
 
-    public void setOffer(Offer offer) {
-        this.offer = offer;
+    public void setMessage(Offer message) {
+        this.message = message;
     }
 
     @Override
     public String toString() {
         return "SdpMessage{" +
                 "sessionId='" + sessionId + '\'' +
-                ", offer='" + offer + '\'' +
+                ", message='" + message + '\'' +
                 '}';
     }
 

@@ -1,6 +1,9 @@
 package com.example.webrtc.webrtc.event.message;
 
-public abstract class BaseMessage {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class BaseMessage {
 
     private TypeMessage typeMessage;
 

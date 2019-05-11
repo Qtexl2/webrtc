@@ -1,6 +1,8 @@
 package com.example.webrtc.webrtc.controller;
 
 import com.example.webrtc.webrtc.event.SessionRepository;
+import com.example.webrtc.webrtc.event.message.BaseMessage;
+import com.example.webrtc.webrtc.event.message.IceMessage;
 import com.example.webrtc.webrtc.event.message.ListUsersMessage;
 import com.example.webrtc.webrtc.event.message.SdpMessage;
 import com.example.webrtc.webrtc.event.message.TypeMessage;
@@ -54,10 +56,15 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         String id = session.getId();
-        SdpMessage sdpMessage = objectMapper.readValue(message.getPayload(), SdpMessage.class);
-        switch (sdpMessage.getTypeMessage()){
+        BaseMessage baseMessage = objectMapper.readValue(message.getPayload(), BaseMessage.class);
+        switch (baseMessage.getTypeMessage()){
             case OFFER:
-            case ANSWER: sendMessageToСorrespondent(id, sdpMessage); break;
+            case ANSWER:
+                    SdpMessage sdpMessage = objectMapper.readValue(message.getPayload(), SdpMessage.class);
+                    sendMessageToСorrespondent(id, sdpMessage); break;
+            case ICE_CANDIDATE:
+                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
+                sendMessageToСorrespondent(id, iceMessage); break;
         }
 
     }
@@ -67,6 +74,15 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
         WebSocketSession webSocketSession = user.getWebSocketSession();
         sdpMessage.setSessionId(id);
         String message = objectMapper.writeValueAsString(sdpMessage);
+        webSocketSession.sendMessage(new TextMessage(message));
+
+    }
+
+    private void sendMessageToСorrespondent(String id, IceMessage iceMessage) throws IOException {
+        User user = sessionRepository.getUser(iceMessage.getSessionId());
+        WebSocketSession webSocketSession = user.getWebSocketSession();
+        iceMessage.setSessionId(id);
+        String message = objectMapper.writeValueAsString(iceMessage);
         webSocketSession.sendMessage(new TextMessage(message));
 
     }
