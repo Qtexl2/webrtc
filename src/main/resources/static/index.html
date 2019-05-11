@@ -1,0 +1,85 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Sample WebSocket Client</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div class="container">-->
+<!--        <input id="name"/>-->
+<!--        <button id="reg">Reg</button>-->
+<!--    </div>-->
+<!--    <div id=users></div>-->
+<!--</body>-->
+<!--<script>-->
+<!--    const name = document.getElementById("name");-->
+<!--    const usersButton = document.getElementById("users");-->
+
+<!--    const regButton = document.getElementById("reg");-->
+
+<!--    regButton.onclick = function (event) {-->
+<!--        const socket = new WebSocket("ws://localhost:8080/socket?name=" + name.value);-->
+<!--        socket.onmessage = function (event) {-->
+
+<!--            const json = JSON.parse(event.data);-->
+<!--            const type = json.typeAnswer;-->
+
+<!--            switch (type) {-->
+<!--                case 'UPDATE_USERS': updateUsers(json.users); break;-->
+<!--            }-->
+
+<!--        };-->
+
+<!--    };-->
+
+<!--    function updateUsers(users){-->
+<!--        usersButton.innerHTML = '';-->
+<!--        users.forEach(function (elem) {-->
+<!--            const key = Object.keys(elem)[0];-->
+<!--            const name = elem[key].name;-->
+<!--            createBlock(key, name);-->
+
+<!--        })-->
+<!--    }-->
+
+<!--    function createBlock(key, name){-->
+<!--        console.log(key + ' ' + name);-->
+<!--        const divElement = document.createElement("button");-->
+<!--        divElement.id = key;-->
+<!--        divElement.innerText = name;-->
+<!--        usersButton.appendChild(divElement);-->
+<!--    }-->
+
+
+<!--    //-->
+<!--    //-->
+<!--    // socket.onmessage = function (event) {-->
+<!--    //     if (event.data instanceof ArrayBuffer) {-->
+<!--    //         addMessageToWindow('Got Image:');-->
+<!--    //         addImageToWindow(event.data);-->
+<!--    //     } else {-->
+<!--    //         addMessageToWindow(`Got Message: ${event.data}`);-->
+<!--    //     }-->
+<!--    // };-->
+
+
+<!--    // sendImageButton.onclick = function (event) {-->
+<!--    //     let file = fileInput.files[0];-->
+<!--    //     sendMessage(file);-->
+<!--    //     fileInput.value = null;-->
+<!--    // };-->
+<!--    //-->
+<!--    // function sendMessage(message) {-->
+<!--    //     socket.send(message);-->
+<!--    //     addMessageToWindow("Sent Message: " + message);-->
+<!--    // }-->
+<!--    //-->
+<!--    // function addMessageToWindow(message) {-->
+<!--    //     messageWindow.innerHTML += `<div>${message}</div>`-->
+<!--    // }-->
+<!--    //-->
+<!--    // function addImageToWindow(image) {-->
+<!--    //     let url = URL.createObjectURL(new Blob([image]));-->
+<!--    //     messageWindow.innerHTML += `<img src="${url}"/>`-->
+<!--    // }-->
+<!--</script>-->
+<!--</html>-->
