@@ -16,6 +16,9 @@
         <input id="name"/>
         <button id="reg">Reg</button>
     </div>
+    <div class=users>
+
+    </div>
 </body>
 <script>
     const name = document.getElementById("name");
@@ -24,9 +27,24 @@
 
     regButton.onclick = function (event) {
         const socket = new WebSocket("ws://localhost:8080/socket?name=" + name.value);
+        socket.onmessage = function (event) {
+
+            const json = JSON.parse(event.data);
+            const type = json.typeAnswer;
+
+            switch (type) {
+                case 'UPDATE_USERS': updateUsers(json.users); break;
+            }
+
+        };
+
     };
 
+    function updateUsers(users){
+        users.forEach(it => console.log(new Map(it).keys()))
 
+
+    }
 
 
 
