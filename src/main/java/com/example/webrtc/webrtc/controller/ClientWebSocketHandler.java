@@ -1,13 +1,12 @@
 package com.example.webrtc.webrtc.controller;
 
-import com.example.webrtc.webrtc.event.SessionRepository;
+import com.example.webrtc.webrtc.event.ClientSessionRepository;
 import com.example.webrtc.webrtc.event.message.BaseMessage;
 import com.example.webrtc.webrtc.event.message.IceMessage;
 import com.example.webrtc.webrtc.event.message.ListUsersMessage;
 import com.example.webrtc.webrtc.event.message.SdpMessage;
 import com.example.webrtc.webrtc.event.message.TypeMessage;
 import com.example.webrtc.webrtc.model.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,13 +16,13 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import java.io.IOException;
 import java.util.Map;
 
-public class WebSocketHandler extends AbstractWebSocketHandler {
+public class ClientWebSocketHandler extends AbstractWebSocketHandler {
 
-    private final SessionRepository sessionRepository;
+    private final ClientSessionRepository clientSessionRepository;
     private final ObjectMapper objectMapper;
 
-    public WebSocketHandler(SessionRepository sessionRepository, ObjectMapper objectMapper) {
-        this.sessionRepository = sessionRepository;
+    public ClientWebSocketHandler(ClientSessionRepository clientSessionRepository, ObjectMapper objectMapper) {
+        this.clientSessionRepository = clientSessionRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -31,15 +30,15 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String name = session.getUri().getQuery().split("=")[1];
         User user = new User(name, session);
-        sessionRepository.add(session.getId(), user);
-        Map<String, User> activeUser = sessionRepository.getActiveUser();
+        clientSessionRepository.add(session.getId(), user);
+        Map<String, User> activeUser = clientSessionRepository.getActiveUser();
         sendNotification(activeUser);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessionRepository.removeUser(session.getId());
-        Map<String, User> activeUser = sessionRepository.getActiveUser();
+        clientSessionRepository.removeUser(session.getId());
+        Map<String, User> activeUser = clientSessionRepository.getActiveUser();
         sendNotification(activeUser);
     }
 
@@ -70,7 +69,7 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     }
 
     private void sendMessageToСorrespondent(String id, SdpMessage sdpMessage) throws IOException {
-        User user = sessionRepository.getUser(sdpMessage.getSessionId());
+        User user = clientSessionRepository.getUser(sdpMessage.getSessionId());
         WebSocketSession webSocketSession = user.getWebSocketSession();
         sdpMessage.setSessionId(id);
         String message = objectMapper.writeValueAsString(sdpMessage);
@@ -79,7 +78,7 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     }
 
     private void sendMessageToСorrespondent(String id, IceMessage iceMessage) throws IOException {
-        User user = sessionRepository.getUser(iceMessage.getSessionId());
+        User user = clientSessionRepository.getUser(iceMessage.getSessionId());
         WebSocketSession webSocketSession = user.getWebSocketSession();
         iceMessage.setSessionId(id);
         String message = objectMapper.writeValueAsString(iceMessage);

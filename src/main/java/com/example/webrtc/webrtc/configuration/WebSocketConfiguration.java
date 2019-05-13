@@ -1,7 +1,7 @@
 package com.example.webrtc.webrtc.configuration;
 
-import com.example.webrtc.webrtc.controller.WebSocketHandler;
-import com.example.webrtc.webrtc.event.SessionRepository;
+import com.example.webrtc.webrtc.controller.ClientWebSocketHandler;
+import com.example.webrtc.webrtc.event.ClientSessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,16 +15,18 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new WebSocketHandler(sessionRepository(), objectMapper()), "/socket").setAllowedOrigins("*");
+        registry.addHandler(new ClientWebSocketHandler(sessionRepository(), objectMapper()), "/socket").setAllowedOrigins("*");
     }
 
     @Bean
-    public SessionRepository sessionRepository(){
-        return new SessionRepository();
+    public ClientSessionRepository sessionRepository(){
+        return new ClientSessionRepository();
     }
 
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
     }
+
+
 }

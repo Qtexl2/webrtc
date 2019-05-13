@@ -5,7 +5,7 @@ import com.example.webrtc.webrtc.model.User;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SessionRepository {
+public class ClientSessionRepository {
 
     private Map<String, User> activeUser = new ConcurrentHashMap<>();
 

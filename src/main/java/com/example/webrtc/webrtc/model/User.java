@@ -8,10 +8,28 @@ public class User {
     private String name;
     @JsonIgnore
     private WebSocketSession webSocketSession;
+    private String janusHandlerId;
+    private String janusSessionId;
 
     public User(String name, WebSocketSession webSocketSession) {
         this.name = name;
         this.webSocketSession = webSocketSession;
+    }
+
+    public String getJanusHandlerId() {
+        return janusHandlerId;
+    }
+
+    public void setJanusHandlerId(String janusHandlerId) {
+        this.janusHandlerId = janusHandlerId;
+    }
+
+    public String getJanusSessionId() {
+        return janusSessionId;
+    }
+
+    public void setJanusSessionId(String janusSessionId) {
+        this.janusSessionId = janusSessionId;
     }
 
     public String getName() {
