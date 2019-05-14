@@ -2,7 +2,6 @@ package com.example.webrtc.webrtc.connector;
 
 import com.example.webrtc.webrtc.controller.JanusWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -20,18 +19,23 @@ public class JanusWebSocketConnector {
     private final String secWebSocketProtocol = "janus-protocol";
     private final String url = "ws://localhost:8188";
     private final WebSocketSession session;
-    @Autowired
-    public JanusWebSocketConnector(JanusWebSocketHandler janusWebSocketHandler) throws ExecutionException, InterruptedException {
+
+
+    public JanusWebSocketConnector(JanusWebSocketHandler janusWebSocketHandler){
         WebSocketClient client = new StandardWebSocketClient();
         WebSocketHttpHeaders webSocketHttpHeaders = new WebSocketHttpHeaders();
         webSocketHttpHeaders.setSecWebSocketProtocol(secWebSocketProtocol);
         URI uri = URI.create(url);
-        session = client.doHandshake(janusWebSocketHandler, webSocketHttpHeaders, uri).get();
+        try {
+            session = client.doHandshake(janusWebSocketHandler, webSocketHttpHeaders, uri).get();
+        } catch (Exception e) {
+            throw new RuntimeException("JanusWebSocketConnector - проблемы");
+        }
     }
 
     @PreDestroy
     private void destroy() throws IOException {
-        if(session.isOpen()){
+        if (session.isOpen()) {
             session.close();
         }
     }

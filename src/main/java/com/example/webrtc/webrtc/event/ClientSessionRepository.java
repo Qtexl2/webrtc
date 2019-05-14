@@ -1,19 +1,21 @@
 package com.example.webrtc.webrtc.event;
 
-import com.example.webrtc.webrtc.model.User;
+import com.example.webrtc.webrtc.model.ClientSession;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class ClientSessionRepository {
 
-    private Map<String, User> activeUser = new ConcurrentHashMap<>();
+    private Map<String, ClientSession> activeUser = new ConcurrentHashMap<>();
 
-    public void add(String sessionId, User user) {
-        activeUser.put(sessionId, user);
+    public void add(String sessionId, ClientSession clientSession) {
+        activeUser.put(sessionId, clientSession);
     }
 
-    public User getUser(String name) {
+    public ClientSession getUser(String name) {
         return activeUser.get(name);
     }
 
@@ -21,7 +23,7 @@ public class ClientSessionRepository {
         activeUser.remove(sessionId);
     }
 
-    public Map<String, User> getActiveUser() {
+    public Map<String, ClientSession> getActiveUser() {
         return activeUser;
     }
 

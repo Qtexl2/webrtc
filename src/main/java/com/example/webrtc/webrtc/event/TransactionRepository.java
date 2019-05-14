@@ -1,8 +1,8 @@
 package com.example.webrtc.webrtc.event;
 
 
+import com.example.webrtc.webrtc.model.janus.JanusTransactional;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,19 +10,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class TransactionRepository {
 
-    private Map<String, WebSocketSession> activeTransaction = new ConcurrentHashMap<>();
+    private Map<String, JanusTransactional> activeTransaction = new ConcurrentHashMap<>();
 
-    public void add(String transaction, WebSocketSession socketSession){
-        activeTransaction.put(transaction, socketSession);
+    public void add(String transaction, JanusTransactional janusTransactional) {
+        activeTransaction.put(transaction, janusTransactional);
     }
 
-    public WebSocketSession getAndRemove(String transaction){
-        WebSocketSession webSocketSession = get(transaction);
+    public JanusTransactional getAndRemove(String transaction) {
+        JanusTransactional janusTransactional = get(transaction);
         activeTransaction.remove(transaction);
-        return webSocketSession;
+        return janusTransactional;
     }
 
-    public WebSocketSession get(String transaction){
+    public JanusTransactional get(String transaction) {
         return activeTransaction.get(transaction);
     }
 }

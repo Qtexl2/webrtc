@@ -3,32 +3,32 @@ package com.example.webrtc.webrtc.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.web.socket.WebSocketSession;
 
-public class User {
+public class ClientSession {
 
     private String name;
     @JsonIgnore
     private WebSocketSession webSocketSession;
-    private String janusHandlerId;
-    private String janusSessionId;
+    private Long janusHandlerId;
+    private Long janusSessionId;
 
-    public User(String name, WebSocketSession webSocketSession) {
+    public ClientSession(String name, WebSocketSession webSocketSession) {
         this.name = name;
         this.webSocketSession = webSocketSession;
     }
 
-    public String getJanusHandlerId() {
+    public Long getJanusHandlerId() {
         return janusHandlerId;
     }
 
-    public void setJanusHandlerId(String janusHandlerId) {
+    public void setJanusHandlerId(Long janusHandlerId) {
         this.janusHandlerId = janusHandlerId;
     }
 
-    public String getJanusSessionId() {
+    public Long getJanusSessionId() {
         return janusSessionId;
     }
 
-    public void setJanusSessionId(String janusSessionId) {
+    public void setJanusSessionId(Long janusSessionId) {
         this.janusSessionId = janusSessionId;
     }
 
@@ -46,5 +46,14 @@ public class User {
 
     public void setWebSocketSession(WebSocketSession webSocketSession) {
         this.webSocketSession = webSocketSession;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientSession{" +
+                "name='" + name + '\'' +
+                ", janusHandlerId=" + janusHandlerId +
+                ", janusSessionId=" + janusSessionId +
+                '}';
     }
 }

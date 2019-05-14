@@ -11,7 +11,7 @@ public class JanusResponse {
     private String transaction;
     private DataResponse data;
     @JsonProperty("session_id")
-    private String sessionId;
+    private Long sessionId;
 
     public JanusActionType getJanus() {
         return janus;
@@ -37,11 +37,11 @@ public class JanusResponse {
         this.data = data;
     }
 
-    public String getSessionId() {
+    public Long getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
     }
 

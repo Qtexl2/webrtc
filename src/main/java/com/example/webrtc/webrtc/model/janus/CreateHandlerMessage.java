@@ -1,16 +1,20 @@
 package com.example.webrtc.webrtc.model.janus;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CreateHandlerMessage {
-    private JanusActionType janus;
-    private String plugin;
+    private JanusActionType janus = JanusActionType.ATTACH;
+    private PluginType plugin;
     private String transaction;
+    @JsonProperty("session_id")
+    private Long sessionId;
 
 
-    public String getPlugin() {
+    public PluginType getPlugin() {
         return plugin;
     }
 
-    public void setPlugin(String plugin) {
+    public void setPlugin(PluginType plugin) {
         this.plugin = plugin;
     }
 
@@ -22,14 +26,18 @@ public class CreateHandlerMessage {
     }
 
 
-    public CreateHandlerMessage(JanusActionType janus, String plugin, String transaction) {
-        this.janus = janus;
+    public CreateHandlerMessage(PluginType plugin, String transaction, Long sessionId) {
         this.plugin = plugin;
         this.transaction = transaction;
+        this.sessionId = sessionId;
     }
 
-    public void setJanus(JanusActionType janus) {
-        this.janus = janus;
+    public Long getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getTransaction() {

@@ -6,6 +6,10 @@ public enum JanusActionType {
     CREATE("create"),
     TIMEOUT("timeout"),
     ATTACH("attach"),
+    MESSAGE("message"),
+    REGISTER("register"),
+    ASK("ack"),
+    EVENT("event"),
     SUCCESS("success");
 
     private String value;

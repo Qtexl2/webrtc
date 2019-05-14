@@ -1,13 +1,21 @@
 package com.example.webrtc.webrtc.controller;
 
+import com.example.webrtc.webrtc.adapter.JanusWebSocketMediaServerAdapter;
 import com.example.webrtc.webrtc.event.ClientSessionRepository;
+import com.example.webrtc.webrtc.event.TransactionRepository;
 import com.example.webrtc.webrtc.event.message.BaseMessage;
 import com.example.webrtc.webrtc.event.message.IceMessage;
 import com.example.webrtc.webrtc.event.message.ListUsersMessage;
 import com.example.webrtc.webrtc.event.message.SdpMessage;
 import com.example.webrtc.webrtc.event.message.TypeMessage;
-import com.example.webrtc.webrtc.model.User;
+import com.example.webrtc.webrtc.generator.TransactionalKeyGenerator;
+import com.example.webrtc.webrtc.model.ClientSession;
+import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
+import com.example.webrtc.webrtc.model.janus.JanusTransactional;
+import com.example.webrtc.webrtc.model.janus.JanusTransactionalStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -16,36 +24,49 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import java.io.IOException;
 import java.util.Map;
 
+@Component
 public class ClientWebSocketHandler extends AbstractWebSocketHandler {
 
     private final ClientSessionRepository clientSessionRepository;
     private final ObjectMapper objectMapper;
-
-    public ClientWebSocketHandler(ClientSessionRepository clientSessionRepository, ObjectMapper objectMapper) {
+    private final JanusWebSocketMediaServerAdapter janusAdapter;
+    private final TransactionRepository transactionRepository;
+    @Lazy
+    public ClientWebSocketHandler(ClientSessionRepository clientSessionRepository, ObjectMapper objectMapper, JanusWebSocketMediaServerAdapter janusAdapter, TransactionRepository transactionRepository) {
         this.clientSessionRepository = clientSessionRepository;
         this.objectMapper = objectMapper;
+        this.janusAdapter = janusAdapter;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String name = session.getUri().getQuery().split("=")[1];
-        User user = new User(name, session);
-        clientSessionRepository.add(session.getId(), user);
-        Map<String, User> activeUser = clientSessionRepository.getActiveUser();
+
+        ClientSession clientSession = new ClientSession(name, session);
+        String transactionKey = TransactionalKeyGenerator.generateKey();
+        JanusTransactional janusTransactional = new JanusTransactional(JanusTransactionalStatus.CREATE_SESSION, session);
+        CreateSessionMessage createSessionMessage = new CreateSessionMessage(transactionKey);
+
+        clientSessionRepository.add(session.getId(), clientSession);
+        transactionRepository.add(transactionKey, janusTransactional);
+        Map<String, ClientSession> activeUser = clientSessionRepository.getActiveUser();
+
+        janusAdapter.createSession(createSessionMessage);
         sendNotification(activeUser);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         clientSessionRepository.removeUser(session.getId());
-        Map<String, User> activeUser = clientSessionRepository.getActiveUser();
+        Map<String, ClientSession> activeUser = clientSessionRepository.getActiveUser();
         sendNotification(activeUser);
     }
 
-    private void sendNotification(Map<String, User> activeUser) throws IOException {
+    private void sendNotification(Map<String, ClientSession> activeUser) throws IOException {
         ListUsersMessage listUsersMessage = new ListUsersMessage(TypeMessage.UPDATE_USERS, activeUser.entrySet());
         String answer = objectMapper.writeValueAsString(listUsersMessage);
-        for (Map.Entry<String, User> entry : activeUser.entrySet()) {
+        for (Map.Entry<String, ClientSession> entry : activeUser.entrySet()) {
 
             WebSocketSession webSocketSession = entry.getValue().getWebSocketSession();
             webSocketSession.sendMessage(new TextMessage(answer));
@@ -69,8 +90,8 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     private void sendMessageToСorrespondent(String id, SdpMessage sdpMessage) throws IOException {
-        User user = clientSessionRepository.getUser(sdpMessage.getSessionId());
-        WebSocketSession webSocketSession = user.getWebSocketSession();
+        ClientSession clientSession = clientSessionRepository.getUser(sdpMessage.getSessionId());
+        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
         sdpMessage.setSessionId(id);
         String message = objectMapper.writeValueAsString(sdpMessage);
         webSocketSession.sendMessage(new TextMessage(message));
@@ -78,8 +99,8 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     private void sendMessageToСorrespondent(String id, IceMessage iceMessage) throws IOException {
-        User user = clientSessionRepository.getUser(iceMessage.getSessionId());
-        WebSocketSession webSocketSession = user.getWebSocketSession();
+        ClientSession clientSession = clientSessionRepository.getUser(iceMessage.getSessionId());
+        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
         iceMessage.setSessionId(id);
         String message = objectMapper.writeValueAsString(iceMessage);
         webSocketSession.sendMessage(new TextMessage(message));

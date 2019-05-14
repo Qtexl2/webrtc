@@ -97,7 +97,7 @@ _response_
 ```
 
 ______________
-####List user
+####List clientSession
 
 **POST https://janus.conf.meetecho.com/janus/{session_id}/{handler_id}**
 

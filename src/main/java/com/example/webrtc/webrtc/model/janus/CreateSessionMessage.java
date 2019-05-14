@@ -1,7 +1,7 @@
 package com.example.webrtc.webrtc.model.janus;
 
 public class CreateSessionMessage {
-    private JanusActionType janus;
+    private JanusActionType janus = JanusActionType.CREATE;
     private String transaction;
 
     public JanusActionType getJanus() {
@@ -11,8 +11,7 @@ public class CreateSessionMessage {
     public CreateSessionMessage() {
     }
 
-    public CreateSessionMessage(JanusActionType janus, String transaction) {
-        this.janus = janus;
+    public CreateSessionMessage(String transaction) {
         this.transaction = transaction;
     }
 
