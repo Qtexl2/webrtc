@@ -44,7 +44,6 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("START");
     }
 
     @Override
@@ -56,6 +55,8 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
             case TIMEOUT: System.out.println("Сорян Таймаут, кишь отседава"); return;
             case DETACHED: System.out.println("Янус тебя отключил"); return;
             case EVENT: handlerEvent(response); return;
+            case WEBRTCUP: System.out.println("WEBRTC START"); return;
+            case MEDIA: System.out.println("MEDIA VIDEO"); return;
         }
 
         String transaction = response.getTransaction();
@@ -66,7 +67,6 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     private void handlerEvent(JanusResponse response) {
-        System.out.println("=================================================================");
         System.out.println(response);
         PluginData plugindata = response.getPlugindata();
         DataResponse data = plugindata.getData();
@@ -105,11 +105,8 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
             case CREATE_HANDLER:
                 Long janusHandlerId = response.getData().getId();
                 clientSession.setJanusHandlerId(janusHandlerId);
-                System.out.println(clientSession);
                 createRegister(clientSession);
                 break;
-            case OFFER:
-                System.out.println("OFFER ПРИШЕЛ");
         }
     }
 
@@ -133,6 +130,5 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        System.out.println("END");
     }
 }

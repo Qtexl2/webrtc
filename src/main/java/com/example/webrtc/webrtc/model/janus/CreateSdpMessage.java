@@ -15,8 +15,8 @@ public class CreateSdpMessage {
     public CreateSdpMessage() {
     }
 
-    public CreateSdpMessage(String username, JsepType type, String sdp, String transaction, Long sessionId, Long handlerId) {
-        this.body = new Body(JanusActionType.CALL, username);
+    public CreateSdpMessage(JanusActionType actionType, String username, JsepType type, String sdp, String transaction, Long sessionId, Long handlerId) {
+        this.body = new Body(actionType, username);
         this.jsep = new Jsep(type, sdp);
         this.transaction = transaction;
         this.sessionId = sessionId;

@@ -12,6 +12,7 @@ import com.example.webrtc.webrtc.generator.TransactionalKeyGenerator;
 import com.example.webrtc.webrtc.model.ClientSession;
 import com.example.webrtc.webrtc.model.janus.CreateSdpMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
+import com.example.webrtc.webrtc.model.janus.JanusActionType;
 import com.example.webrtc.webrtc.model.janus.JanusTransactional;
 import com.example.webrtc.webrtc.model.janus.JanusTransactionalStatus;
 import com.example.webrtc.webrtc.model.janus.JsepType;
@@ -79,18 +80,15 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        System.out.println(message.getPayload());
+        System.out.println("SEND BY USER  = " + message.getPayload());
         String id = session.getId();
         BaseMessage baseMessage = objectMapper.readValue(message.getPayload(), BaseMessage.class);
         switch (baseMessage.getTypeMessage()){
             case OFFER:
-                    SdpMessage sdpMessage = objectMapper.readValue(message.getPayload(), SdpMessage.class);
-                    sendSdpToMediaServer(id, sdpMessage);
-//                    sendMessageToСorrespondent(id, sdpMessage);
-                    break;
             case ANSWER:
-//                    SdpMessage sdpMessage1 = objectMapper.readValue(message.getPayload(), SdpMessage.class);
-//                    sendMessageToСorrespondent(id, sdpMessage1); break;
+                SdpMessage sdpMessage = objectMapper.readValue(message.getPayload(), SdpMessage.class);
+                sendSdpToMediaServer(id, sdpMessage, baseMessage.getTypeMessage());
+                break;
             case ICE_CANDIDATE:
 //                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
 //                sendMessageToСorrespondent(id, iceMessage); break;
@@ -98,13 +96,22 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
 
     }
 
-    private void sendSdpToMediaServer(String currentSessionId, SdpMessage sdpMessage){
+    private void sendSdpToMediaServer(String currentSessionId, SdpMessage sdpMessage, TypeMessage type){
         ClientSession currentUser = clientSessionRepository.getUser(currentSessionId);
         ClientSession receiverUser = clientSessionRepository.getUser(sdpMessage.getSessionId());
 
         String key = TransactionalKeyGenerator.generateKey();
-        CreateSdpMessage createSdpMessage = new CreateSdpMessage(receiverUser.getName(), JsepType.OFFER, sdpMessage.getMessage().getSdp(), key, currentUser.getJanusSessionId(), currentUser.getJanusHandlerId());
-        JanusTransactional transactional = new JanusTransactional(JanusTransactionalStatus.OFFER, receiverUser.getWebSocketSession());
+        CreateSdpMessage createSdpMessage;
+        JanusTransactional transactional;
+        if(type == TypeMessage.OFFER){
+            createSdpMessage = new CreateSdpMessage(JanusActionType.CALL, receiverUser.getName(), JsepType.OFFER, sdpMessage.getMessage().getSdp(), key, currentUser.getJanusSessionId(), currentUser.getJanusHandlerId());
+            transactional = new JanusTransactional(JanusTransactionalStatus.OFFER, receiverUser.getWebSocketSession());
+        } else {
+            createSdpMessage = new CreateSdpMessage(JanusActionType.ACCEPT, null, JsepType.ANSWER, sdpMessage.getMessage().getSdp(), key, currentUser.getJanusSessionId(), currentUser.getJanusHandlerId());
+            transactional = new JanusTransactional(JanusTransactionalStatus.ANSWER, receiverUser.getWebSocketSession());
+            System.out.println("УЛЕТАЕТ АНСВЕР НА ЯНУС");
+            System.out.println(transactional);
+        }
         transactionRepository.add(key, transactional);
         adapter.sendSdp(createSdpMessage);
     }

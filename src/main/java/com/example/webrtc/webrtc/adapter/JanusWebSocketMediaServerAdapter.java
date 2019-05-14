@@ -32,7 +32,6 @@ public class JanusWebSocketMediaServerAdapter {
     private String serializeObject(Object object) {
         try {
             String s = objectMapper.writeValueAsString(object);
-            System.out.println(" SEND " + s);
             return s;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e.getMessage(), e.getCause());

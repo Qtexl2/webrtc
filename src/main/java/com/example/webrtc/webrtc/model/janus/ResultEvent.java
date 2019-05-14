@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ResultEvent {
     INCOMINGCALL("incomingcall"),
     CALLING("calling"),
+    ACCEPTED("accepted"),
     REGISTERED("registered");
 
     private String value;
