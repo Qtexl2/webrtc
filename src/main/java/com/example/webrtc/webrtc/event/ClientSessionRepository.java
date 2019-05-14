@@ -4,6 +4,7 @@ import com.example.webrtc.webrtc.model.ClientSession;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -25,6 +26,18 @@ public class ClientSessionRepository {
 
     public Map<String, ClientSession> getActiveUser() {
         return activeUser;
+    }
+
+    public ClientSession getClientBySessionAndHandleId(Long sessionId, Long handleId){
+        return activeUser.values().stream()
+                .filter(it -> Objects.equals(it.getJanusSessionId(), sessionId) && Objects.equals(it.getJanusHandlerId(), handleId))
+                .findFirst().get();
+    }
+
+    public ClientSession getClientByName(String name){
+        return activeUser.values().stream()
+                .filter(it -> Objects.equals(it.getName(), name))
+                .findFirst().get();
     }
 
 }

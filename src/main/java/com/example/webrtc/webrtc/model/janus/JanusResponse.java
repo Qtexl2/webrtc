@@ -1,9 +1,7 @@
 package com.example.webrtc.webrtc.model.janus;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JanusResponse {
@@ -12,6 +10,9 @@ public class JanusResponse {
     private DataResponse data;
     @JsonProperty("session_id")
     private Long sessionId;
+    private Long sender;
+    private Jsep jsep;
+    private PluginData plugindata;
 
     public JanusActionType getJanus() {
         return janus;
@@ -45,13 +46,40 @@ public class JanusResponse {
         this.sessionId = sessionId;
     }
 
+    public Long getSender() {
+        return sender;
+    }
+
+    public void setSender(Long sender) {
+        this.sender = sender;
+    }
+
+    public Jsep getJsep() {
+        return jsep;
+    }
+
+    public void setJsep(Jsep jsep) {
+        this.jsep = jsep;
+    }
+
+    public PluginData getPlugindata() {
+        return plugindata;
+    }
+
+    public void setPlugindata(PluginData plugindata) {
+        this.plugindata = plugindata;
+    }
+
     @Override
     public String toString() {
         return "JanusResponse{" +
                 "janus=" + janus +
                 ", transaction='" + transaction + '\'' +
                 ", data=" + data +
-                ", sessionId='" + sessionId + '\'' +
+                ", sessionId=" + sessionId +
+                ", sender=" + sender +
+                ", jsep=" + jsep +
+                ", plugindata=" + plugindata +
                 '}';
     }
 }

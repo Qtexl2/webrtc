@@ -8,6 +8,13 @@ public class BaseMessage {
     private TypeMessage typeMessage;
 
 
+    public BaseMessage(TypeMessage typeMessage) {
+        this.typeMessage = typeMessage;
+    }
+
+    public BaseMessage() {
+    }
+
     public TypeMessage getTypeMessage() {
         return typeMessage;
     }

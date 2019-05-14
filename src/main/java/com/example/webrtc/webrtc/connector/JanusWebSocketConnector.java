@@ -1,7 +1,6 @@
 package com.example.webrtc.webrtc.connector;
 
 import com.example.webrtc.webrtc.controller.JanusWebSocketHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -12,7 +11,6 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.ExecutionException;
 
 @Component
 public class JanusWebSocketConnector {
@@ -21,7 +19,7 @@ public class JanusWebSocketConnector {
     private final WebSocketSession session;
 
 
-    public JanusWebSocketConnector(JanusWebSocketHandler janusWebSocketHandler){
+    public JanusWebSocketConnector(JanusWebSocketHandler janusWebSocketHandler) {
         WebSocketClient client = new StandardWebSocketClient();
         WebSocketHttpHeaders webSocketHttpHeaders = new WebSocketHttpHeaders();
         webSocketHttpHeaders.setSecWebSocketProtocol(secWebSocketProtocol);

@@ -6,8 +6,11 @@ public enum JanusActionType {
     CREATE("create"),
     TIMEOUT("timeout"),
     ATTACH("attach"),
+    CALL("call"),
     MESSAGE("message"),
     REGISTER("register"),
+    DETACHED("detached"),
+    HANGUP("HANGUP"),
     ASK("ack"),
     EVENT("event"),
     SUCCESS("success");

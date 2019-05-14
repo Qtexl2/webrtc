@@ -10,9 +10,11 @@ import com.example.webrtc.webrtc.event.message.SdpMessage;
 import com.example.webrtc.webrtc.event.message.TypeMessage;
 import com.example.webrtc.webrtc.generator.TransactionalKeyGenerator;
 import com.example.webrtc.webrtc.model.ClientSession;
+import com.example.webrtc.webrtc.model.janus.CreateSdpMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
 import com.example.webrtc.webrtc.model.janus.JanusTransactional;
 import com.example.webrtc.webrtc.model.janus.JanusTransactionalStatus;
+import com.example.webrtc.webrtc.model.janus.JsepType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -31,12 +33,14 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
     private final ObjectMapper objectMapper;
     private final JanusWebSocketMediaServerAdapter janusAdapter;
     private final TransactionRepository transactionRepository;
+    private final JanusWebSocketMediaServerAdapter adapter;
     @Lazy
-    public ClientWebSocketHandler(ClientSessionRepository clientSessionRepository, ObjectMapper objectMapper, JanusWebSocketMediaServerAdapter janusAdapter, TransactionRepository transactionRepository) {
+    public ClientWebSocketHandler(ClientSessionRepository clientSessionRepository, ObjectMapper objectMapper, JanusWebSocketMediaServerAdapter janusAdapter, TransactionRepository transactionRepository, JanusWebSocketMediaServerAdapter adapter) {
         this.clientSessionRepository = clientSessionRepository;
         this.objectMapper = objectMapper;
         this.janusAdapter = janusAdapter;
         this.transactionRepository = transactionRepository;
+        this.adapter = adapter;
     }
 
     @Override
@@ -75,35 +79,51 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
+        System.out.println(message.getPayload());
         String id = session.getId();
         BaseMessage baseMessage = objectMapper.readValue(message.getPayload(), BaseMessage.class);
         switch (baseMessage.getTypeMessage()){
             case OFFER:
-            case ANSWER:
                     SdpMessage sdpMessage = objectMapper.readValue(message.getPayload(), SdpMessage.class);
-                    sendMessageToСorrespondent(id, sdpMessage); break;
+                    sendSdpToMediaServer(id, sdpMessage);
+//                    sendMessageToСorrespondent(id, sdpMessage);
+                    break;
+            case ANSWER:
+//                    SdpMessage sdpMessage1 = objectMapper.readValue(message.getPayload(), SdpMessage.class);
+//                    sendMessageToСorrespondent(id, sdpMessage1); break;
             case ICE_CANDIDATE:
-                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
-                sendMessageToСorrespondent(id, iceMessage); break;
+//                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
+//                sendMessageToСorrespondent(id, iceMessage); break;
         }
 
     }
 
-    private void sendMessageToСorrespondent(String id, SdpMessage sdpMessage) throws IOException {
-        ClientSession clientSession = clientSessionRepository.getUser(sdpMessage.getSessionId());
-        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
-        sdpMessage.setSessionId(id);
-        String message = objectMapper.writeValueAsString(sdpMessage);
-        webSocketSession.sendMessage(new TextMessage(message));
+    private void sendSdpToMediaServer(String currentSessionId, SdpMessage sdpMessage){
+        ClientSession currentUser = clientSessionRepository.getUser(currentSessionId);
+        ClientSession receiverUser = clientSessionRepository.getUser(sdpMessage.getSessionId());
 
+        String key = TransactionalKeyGenerator.generateKey();
+        CreateSdpMessage createSdpMessage = new CreateSdpMessage(receiverUser.getName(), JsepType.OFFER, sdpMessage.getMessage().getSdp(), key, currentUser.getJanusSessionId(), currentUser.getJanusHandlerId());
+        JanusTransactional transactional = new JanusTransactional(JanusTransactionalStatus.OFFER, receiverUser.getWebSocketSession());
+        transactionRepository.add(key, transactional);
+        adapter.sendSdp(createSdpMessage);
     }
 
-    private void sendMessageToСorrespondent(String id, IceMessage iceMessage) throws IOException {
-        ClientSession clientSession = clientSessionRepository.getUser(iceMessage.getSessionId());
-        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
-        iceMessage.setSessionId(id);
-        String message = objectMapper.writeValueAsString(iceMessage);
-        webSocketSession.sendMessage(new TextMessage(message));
-
-    }
+//    private void sendMessageToСorrespondent(String id, SdpMessage sdpMessage) throws IOException {
+//        ClientSession clientSession = clientSessionRepository.getUser(sdpMessage.getSessionId());
+//        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
+//        sdpMessage.setSessionId(id);
+//        String message = objectMapper.writeValueAsString(sdpMessage);
+//        webSocketSession.sendMessage(new TextMessage(message));
+//
+//    }
+//
+//    private void sendMessageToСorrespondent(String id, IceMessage iceMessage) throws IOException {
+//        ClientSession clientSession = clientSessionRepository.getUser(iceMessage.getSessionId());
+//        WebSocketSession webSocketSession = clientSession.getWebSocketSession();
+//        iceMessage.setSessionId(id);
+//        String message = objectMapper.writeValueAsString(iceMessage);
+//        webSocketSession.sendMessage(new TextMessage(message));
+//
+//    }
 }

@@ -1,8 +1,21 @@
 package com.example.webrtc.webrtc.event.message;
 
+import com.example.webrtc.webrtc.model.janus.Jsep;
+import com.example.webrtc.webrtc.model.janus.JsepType;
+import com.example.webrtc.webrtc.model.janus.Sdp;
+
 public class SdpMessage extends BaseMessage {
     private String sessionId;
-    private Offer message;
+    private Sdp message;
+
+    public SdpMessage() {
+    }
+
+    public SdpMessage(String sessionId, Sdp message, TypeMessage typeMessage) {
+        super(typeMessage);
+        this.sessionId = sessionId;
+        this.message = message;
+    }
 
 
     public String getSessionId() {
@@ -13,11 +26,11 @@ public class SdpMessage extends BaseMessage {
         this.sessionId = sessionId;
     }
 
-    public Offer getMessage() {
+    public Sdp getMessage() {
         return message;
     }
 
-    public void setMessage(Offer message) {
+    public void setMessage(Sdp message) {
         this.message = message;
     }
 
@@ -29,24 +42,5 @@ public class SdpMessage extends BaseMessage {
                 '}';
     }
 
-    public class Offer{
-        private String type;
-        private String sdp;
 
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getSdp() {
-            return sdp;
-        }
-
-        public void setSdp(String sdp) {
-            this.sdp = sdp;
-        }
-    }
 }

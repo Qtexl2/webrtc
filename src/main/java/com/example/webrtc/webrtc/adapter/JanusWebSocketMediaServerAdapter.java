@@ -2,6 +2,7 @@ package com.example.webrtc.webrtc.adapter;
 
 import com.example.webrtc.webrtc.connector.JanusWebSocketConnector;
 import com.example.webrtc.webrtc.model.janus.CreateHandlerMessage;
+import com.example.webrtc.webrtc.model.janus.CreateSdpMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
 import com.example.webrtc.webrtc.model.janus.RegisterMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +46,11 @@ public class JanusWebSocketMediaServerAdapter {
 
     public void createRegister(RegisterMessage registerMessage) {
         String message = serializeObject(registerMessage);
+        connector.send(message);
+    }
+
+    public void sendSdp(CreateSdpMessage createSdpMessage) {
+        String message = serializeObject(createSdpMessage);
         connector.send(message);
     }
 }
