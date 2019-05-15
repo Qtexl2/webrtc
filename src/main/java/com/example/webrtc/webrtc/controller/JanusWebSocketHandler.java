@@ -49,7 +49,6 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String content = message.getPayload();
-        System.out.println(content);
         JanusResponse response = objectMapper.readValue(content, JanusResponse.class);
         switch (response.getJanus()){
             case TIMEOUT: System.out.println("Сорян Таймаут, кишь отседава"); return;
@@ -57,6 +56,7 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
             case EVENT: handlerEvent(response); return;
             case WEBRTCUP: System.out.println("WEBRTC START"); return;
             case MEDIA: System.out.println("MEDIA VIDEO"); return;
+            case ASK: System.out.println(content); return;
         }
 
         String transaction = response.getTransaction();
@@ -73,17 +73,21 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
         Result result = data.getResult();
 
         switch (result.getEvent()){
-            case INCOMINGCALL: setVideoCall(response); break;
+            case INCOMINGCALL: setVideoCall(response, JsepType.OFFER, TypeMessage.OFFER); break;
+            case ACCEPTED: setVideoCall(response, JsepType.ANSWER, TypeMessage.ANSWER); break;
         }
     }
 
-    private void setVideoCall(JanusResponse response) {
+    private void setVideoCall(JanusResponse response, JsepType jsepType, TypeMessage typeMessage) {
         String senderName = response.getPlugindata().getData().getResult().getUsername();
+        if (senderName == null){
+            return;
+        }
         String senderSessionId = clientSessionRepository.getClientByName(senderName).getWebSocketSession().getId();
         Long sessionId = response.getSessionId();
         Long hangleId = response.getSender();
         ClientSession receiverClient = clientSessionRepository.getClientBySessionAndHandleId(sessionId, hangleId);
-        SdpMessage message = new SdpMessage(senderSessionId, new Sdp(JsepType.OFFER, response.getJsep().getSdp()), TypeMessage.OFFER);
+        SdpMessage message = new SdpMessage(senderSessionId, new Sdp(jsepType, response.getJsep().getSdp()), typeMessage);
         try {
             String json = objectMapper.writeValueAsString(message);
             receiverClient.getWebSocketSession().sendMessage(new TextMessage(json));

@@ -10,15 +10,18 @@ import com.example.webrtc.webrtc.event.message.SdpMessage;
 import com.example.webrtc.webrtc.event.message.TypeMessage;
 import com.example.webrtc.webrtc.generator.TransactionalKeyGenerator;
 import com.example.webrtc.webrtc.model.ClientSession;
+import com.example.webrtc.webrtc.model.janus.Candidate;
 import com.example.webrtc.webrtc.model.janus.CreateSdpMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
 import com.example.webrtc.webrtc.model.janus.JanusActionType;
 import com.example.webrtc.webrtc.model.janus.JanusTransactional;
 import com.example.webrtc.webrtc.model.janus.JanusTransactionalStatus;
 import com.example.webrtc.webrtc.model.janus.JsepType;
+import com.example.webrtc.webrtc.model.janus.SendIceCandidate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -90,8 +93,8 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
                 sendSdpToMediaServer(id, sdpMessage, baseMessage.getTypeMessage());
                 break;
             case ICE_CANDIDATE:
-//                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
-//                sendMessageToСorrespondent(id, iceMessage); break;
+                IceMessage iceMessage = objectMapper.readValue(message.getPayload(), IceMessage.class);
+                sendIceCandidateToMediaServer(id, iceMessage); break;
         }
 
     }
@@ -109,11 +112,31 @@ public class ClientWebSocketHandler extends AbstractWebSocketHandler {
         } else {
             createSdpMessage = new CreateSdpMessage(JanusActionType.ACCEPT, null, JsepType.ANSWER, sdpMessage.getMessage().getSdp(), key, currentUser.getJanusSessionId(), currentUser.getJanusHandlerId());
             transactional = new JanusTransactional(JanusTransactionalStatus.ANSWER, receiverUser.getWebSocketSession());
-            System.out.println("УЛЕТАЕТ АНСВЕР НА ЯНУС");
             System.out.println(transactional);
         }
         transactionRepository.add(key, transactional);
         adapter.sendSdp(createSdpMessage);
+    }
+
+    private void sendIceCandidateToMediaServer(String currentSessionId, IceMessage iceMessage){
+        System.out.println(iceMessage);
+        ClientSession currentUser = clientSessionRepository.getUser(currentSessionId);
+        Long janusHandlerId = currentUser.getJanusHandlerId();
+        Long janusSessionId = currentUser.getJanusSessionId();
+
+
+        String key = TransactionalKeyGenerator.generateKey();
+        JanusTransactional transactional = new JanusTransactional(JanusTransactionalStatus.ICE, currentUser.getWebSocketSession());
+        transactionRepository.add(key, transactional);
+        Candidate candidate;
+        if(StringUtils.isEmpty(iceMessage.getMessage())){
+            candidate = new Candidate();
+        } else {
+            candidate = new Candidate(iceMessage.getMessage(), 0, "0");
+        }
+        SendIceCandidate iceCandidate = new SendIceCandidate(janusSessionId, janusHandlerId, JanusActionType.TRICKLE, key, candidate);
+        System.out.println(iceCandidate);
+        adapter.sendIce(iceCandidate);
     }
 
 //    private void sendMessageToСorrespondent(String id, SdpMessage sdpMessage) throws IOException {

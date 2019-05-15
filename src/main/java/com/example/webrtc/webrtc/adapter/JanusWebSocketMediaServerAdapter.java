@@ -5,6 +5,7 @@ import com.example.webrtc.webrtc.model.janus.CreateHandlerMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSdpMessage;
 import com.example.webrtc.webrtc.model.janus.CreateSessionMessage;
 import com.example.webrtc.webrtc.model.janus.RegisterMessage;
+import com.example.webrtc.webrtc.model.janus.SendIceCandidate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Lazy;
@@ -50,6 +51,12 @@ public class JanusWebSocketMediaServerAdapter {
 
     public void sendSdp(CreateSdpMessage createSdpMessage) {
         String message = serializeObject(createSdpMessage);
+        connector.send(message);
+    }
+
+    public void sendIce(SendIceCandidate sendIceCandidate) {
+        String message = serializeObject(sendIceCandidate);
+        System.out.println("ICE летит на сервер" + message);
         connector.send(message);
     }
 }
