@@ -6,6 +6,7 @@ public enum ResultEvent {
     INCOMINGCALL("incomingcall"),
     CALLING("calling"),
     ACCEPTED("accepted"),
+    HANGUP("hangup"),
     REGISTERED("registered");
 
     private String value;

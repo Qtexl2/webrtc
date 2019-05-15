@@ -16,7 +16,7 @@ public enum JanusActionType {
     KEEPLIVE("keepalive"),
     REGISTER("register"),
     DETACHED("detached"),
-    HANGUP("HANGUP"),
+    HANGUP("hangup"),
     ASK("ack"),
     EVENT("event"),
     SUCCESS("success");
