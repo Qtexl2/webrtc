@@ -17,12 +17,17 @@ public class TransactionRepository {
     }
 
     public JanusTransactional getAndRemove(String transaction) {
-        JanusTransactional janusTransactional = get(transaction);
-        activeTransaction.remove(transaction);
-        return janusTransactional;
+        if(transaction != null && activeTransaction.containsKey(transaction)){
+            JanusTransactional janusTransactional = get(transaction);
+            activeTransaction.remove(transaction);
+            return janusTransactional;
+        }
+        return null;
     }
-
-    public JanusTransactional get(String transaction) {
+    public int size(){
+        return activeTransaction.size();
+    }
+    private JanusTransactional get(String transaction) {
         return activeTransaction.get(transaction);
     }
 }

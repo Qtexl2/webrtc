@@ -18,6 +18,7 @@ import com.example.webrtc.webrtc.model.janus.PluginType;
 import com.example.webrtc.webrtc.model.janus.RegisterMessage;
 import com.example.webrtc.webrtc.model.janus.Result;
 import com.example.webrtc.webrtc.model.janus.Sdp;
+import com.example.webrtc.webrtc.model.janus.SendKeepLive;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -26,6 +27,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JanusWebSocketHandler extends AbstractWebSocketHandler {
@@ -49,20 +53,42 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String content = message.getPayload();
+        System.out.println(content);
         JanusResponse response = objectMapper.readValue(content, JanusResponse.class);
-        switch (response.getJanus()){
-            case TIMEOUT: System.out.println("Сорян Таймаут, кишь отседава"); return;
-            case DETACHED: System.out.println("Янус тебя отключил"); return;
-            case EVENT: handlerEvent(response); return;
-            case WEBRTCUP: System.out.println("WEBRTC START"); return;
-            case MEDIA: System.out.println("MEDIA VIDEO"); return;
-            case ASK: System.out.println(content); return;
-        }
-
         String transaction = response.getTransaction();
         JanusTransactional janusTransactional = transactionRepository.getAndRemove(transaction);
+
+        switch (response.getJanus()){
+            case TIMEOUT: System.out.println("Сорян Таймаут, кишь отседава"); break;
+            case DETACHED: System.out.println("Янус тебя отключил"); break;
+            case EVENT: handlerEvent(response); break;
+            case WEBRTCUP: System.out.println("WEBRTC START"); break;
+            case MEDIA: System.out.println("MEDIA VIDEO"); break;
+            case ASK: handleAsk(janusTransactional); break;
+        }
+
         if(janusTransactional != null){
             handlerPrepareSetting(response, janusTransactional);
+        }
+    }
+
+    private void handleAsk(JanusTransactional janusTransactional) {
+        JanusTransactionalStatus status = janusTransactional.getStatus();
+        if (status == JanusTransactionalStatus.REGISTER){
+            String clientSessionId = janusTransactional.getUserSession().getId();
+            ClientSession clientSession = clientSessionRepository.getUser(clientSessionId);
+            Long janusSessionId = clientSession.getJanusSessionId();
+            ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(1);
+            clientSession.setKeepLiveScheduler(scheduled);
+
+            scheduled.scheduleWithFixedDelay(() -> {
+                String key = TransactionalKeyGenerator.generateKey();
+                JanusTransactional transactional = new JanusTransactional(JanusTransactionalStatus.KEEPLIVE, clientSession.getWebSocketSession());
+                transactionRepository.add(key, transactional);
+
+                SendKeepLive sendKeepLive = new SendKeepLive(janusSessionId, key);
+                adapter.sendKeepLive(sendKeepLive);
+            },30,30, TimeUnit.SECONDS);
         }
     }
 
@@ -135,4 +161,7 @@ public class JanusWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     }
+
+
+
 }

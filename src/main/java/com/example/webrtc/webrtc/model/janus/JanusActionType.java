@@ -13,6 +13,7 @@ public enum JanusActionType {
     MEDIA("media"),
     TRICKLE("trickle"),
     MESSAGE("message"),
+    KEEPLIVE("keepalive"),
     REGISTER("register"),
     DETACHED("detached"),
     HANGUP("HANGUP"),

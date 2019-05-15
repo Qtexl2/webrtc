@@ -3,6 +3,8 @@ package com.example.webrtc.webrtc.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 public class ClientSession {
 
     private String name;
@@ -10,10 +12,20 @@ public class ClientSession {
     private WebSocketSession webSocketSession;
     private Long janusHandlerId;
     private Long janusSessionId;
+    @JsonIgnore
+    private ScheduledExecutorService keepLiveScheduler;
 
     public ClientSession(String name, WebSocketSession webSocketSession) {
         this.name = name;
         this.webSocketSession = webSocketSession;
+    }
+
+    public ScheduledExecutorService getKeepLiveScheduler() {
+        return keepLiveScheduler;
+    }
+
+    public void setKeepLiveScheduler(ScheduledExecutorService keepLiveScheduler) {
+        this.keepLiveScheduler = keepLiveScheduler;
     }
 
     public Long getJanusHandlerId() {
